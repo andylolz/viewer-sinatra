@@ -4,26 +4,47 @@ module Popolo
   require 'json'
   require 'promise'
 
+  class Entity < Hash
+  end
+
+  class Person < Entity
+  end
+
+  class Organization < Entity
+  end
+
+  class Membership < Entity
+  end
+
   class Data
 
     def initialize(file)
       @_file = file
     end
 
+    def _parse_json
+      data = JSON.parse(File.read("data/#{@_file}.json"))
+      return {
+        persons: data['persons'].map             { |p| Person[p] },
+        organizations: data['organizations'].map { |o| Organization[o] },
+        memberships: data['memberships'].map     { |m| Membership[m] },
+      }
+    end
+
     def json
-      @_data ||= JSON.parse(File.read("data/#{@_file}.json"))
+      @_data ||= _parse_json
     end
 
     def persons
-      json['persons']
+      json[:persons]
     end
 
     def organizations
-      json['organizations']
+      json[:organizations]
     end
 
     def memberships
-      @_mems ||= json['memberships'].map { |m|
+      @_mems ||= json[:memberships].map { |m|
         m['organization'] ||= promise { party_from_id(m['organization_id']) }
         m['on_behalf_of'] ||= promise { party_from_id(m['on_behalf_of_id']) }
         m['person']       ||= promise { person_from_id(m['person_id']) or raise "No such person: #{m['person_id']}" }
@@ -38,7 +59,7 @@ module Popolo
 
     def legislature
       # TODO cope with more than one!
-      json['organizations'].find { |o| o['classification'] == 'legislature' }
+      organizations.find { |o| o['classification'] == 'legislature' }
     end
 
     def chambers
@@ -46,7 +67,7 @@ module Popolo
     end
 
     def parties
-      json['organizations'].find_all { |o| o['classification'] == 'party' }
+      organizations.find_all { |o| o['classification'] == 'party' }
     end
 
     def terms
