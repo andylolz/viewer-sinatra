@@ -33,12 +33,8 @@ describe "Chile" do
 
     before { get '/chile/term/current' }
 
-    it "should have have at least 1 party" do
-      subject.css('#term a[href*="/party/"]').count.must_be :>=, 1
-    end
-
-    it "should have have at least 1 person" do
-      subject.css('#term a[href*="/person/"]').count.must_be :>=, 1
+    it "should include Lozano" do
+      subject.css('#term table').text.must_include 'Marco Antonio Núñez Lozano'
     end
 
   end

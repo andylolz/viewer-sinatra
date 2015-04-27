@@ -17,11 +17,11 @@
         </tr>
 
       <% @memberships.group_by { |m| m['person'] }.sort_by { |p, _| p['name'] }.each do |p, mems| %>
-        <tr>
+        <tr id="mem-<%= p['id'].split('/').last %>">
           <td rowspan="<%= mems.count %>"><%= p['name'] %></td>
           <% mems.each do |m| %>
             <td><%= m['on_behalf_of']['name'] %></td>
-            <td><%= m['area']['name'] %></td>
+            <td><%= m['area'] && m['area']['name'] %></td>
             <td> 
               <% if m['start_date'].to_s != @term['start_date'].to_s or m['end_date'].to_s != @term['end_date'].to_s %>
                 <p><%= m['start_date'] %>–<%= m['end_date'] %></p>
