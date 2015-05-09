@@ -63,7 +63,7 @@ module Popolo
     end
 
     def chambers
-      json['organizations'].find_all { |o| o['classification'] == 'chamber' } 
+      organizations.find_all { |o| o['classification'] == 'chamber' } 
     end
 
     def parties
