@@ -7,7 +7,28 @@ module Popolo
   class Entity < Hash
   end
 
-  class Person < Entity
+  class Person 
+    def initialize(json)
+      @json = json
+    end
+
+    def id
+      @json['id'].split('/').last
+    end
+
+    def name
+      @json['name']
+    end
+
+    def [](k)
+      @json[k]
+    end
+
+    def has_key?(k)
+      # TODO find who's calling this and give them a better method
+      @json.has_key? k
+    end
+
   end
 
   class Organization < Entity
@@ -25,7 +46,7 @@ module Popolo
     def _parse_json
       data = JSON.parse(File.read("data/#{@_file}.json"))
       return {
-        persons: data['persons'].map             { |p| Person[p] },
+        persons: data['persons'].map             { |p| Person.new(p) },
         organizations: data['organizations'].map { |o| Organization[o] },
         memberships: data['memberships'].map     { |m| Membership[m] },
       }
@@ -100,19 +121,19 @@ module Popolo
     end
 
     def person_from_id(id)
-      persons.detect { |r| r['id'] == id } || persons.detect { |r| r['id'].end_with? "/#{id}" }
+      persons.detect { |p| p.id == id.split('/').last } 
     end
 
     def people_with_name(name)
-      persons.find_all { |p| p['name'] == name } 
+      persons.find_all { |p| p.name == name } 
     end
 
     def person_memberships(p)
-      memberships.find_all { |m| m['person_id'] == p['id'] }
+      memberships.find_all { |m| m['person_id'].to_s.split('/').last == p.id } 
     end
 
     def person_legislative_memberships(p)
-      legislative_memberships.find_all { |m| m['person_id'] == p['id'] }
+      legislative_memberships.find_all { |m| m['person_id'].to_s.split('/').last == p.id }
     end
 
     def party_from_id(id)
