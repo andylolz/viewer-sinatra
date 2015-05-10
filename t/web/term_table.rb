@@ -44,7 +44,7 @@ describe "Per Country Tests" do
 
   describe "Finland" do
 
-    before { get '/finland/term_table/35.html' }
+    before { @_got ||= get '/finland/term_table/35.html' }
 
     it "should have have its name" do
       subject.css('#term h1').text.must_include 'Eduskunta 35 (2007)'

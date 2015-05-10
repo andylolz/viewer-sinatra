@@ -7,17 +7,13 @@ module Popolo
   class Entity < Hash
   end
 
-  class Person 
+  class JSONobj 
     def initialize(json)
       @json = json
     end
 
     def id
       @json['id'].split('/').last
-    end
-
-    def name
-      @json['name']
     end
 
     def [](k)
@@ -31,7 +27,16 @@ module Popolo
 
   end
 
-  class Organization < Entity
+  class Person < JSONobj
+    def name
+      @json['name']
+    end
+  end
+
+  class Organization < JSONobj
+    def name
+      @json['name']
+    end
   end
 
   class Membership < Entity
@@ -44,11 +49,12 @@ module Popolo
     end
 
     def _parse_json
+      warn "Parsing #{@_file}"
       data = JSON.parse(File.read("data/#{@_file}.json"))
       return {
-        persons: data['persons'].map             { |p| Person.new(p) },
-        organizations: data['organizations'].map { |o| Organization[o] },
-        memberships: data['memberships'].map     { |m| Membership[m] },
+        persons: data['persons'].map             { |p| promise { Person.new(p) } },
+        organizations: data['organizations'].map { |o| promise { Organization.new(o) } },
+        memberships: data['memberships'].map     { |m| promise { Membership[m] } },
       }
     end
 
